@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
 
 
 // middlewares and routes
-app.use('/api/v1/auth',AuthRouter)
+app.use('/api/v1',AuthRouter)
 
 
 export default app; // Export the app instance for use in other modules

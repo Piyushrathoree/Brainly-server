@@ -1,13 +1,27 @@
 import { Schema, model } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-const userSchema = new Schema(
+
+interface IUser {
+    name: string;
+    email: string;
+    password: string;
+    verificationCode?: string;
+    verificationCodeExpires?: Date;
+    resetPasswordToken?: string;
+    resetPasswordTokenExpires?: Date;
+    isVerified?: boolean;
+    lastLogin?: Date;
+    generateAuthToken: () => string;
+    comparePassword: (password: string) => Promise<boolean>;
+}
+const userSchema = new Schema<IUser>(
     {
-        username: { type: String, required: true },
+        name: { type: String, required: true },
         email: { type: String, required: true },
         password: { type: String, required: true },
-        verificationToken: { type: String },
-        verificationTokenExpires: { type: Date },
+        verificationCode: { type: String },
+        verificationCodeExpires: { type: Date },
         resetPasswordToken: { type: String },
         resetPasswordTokenExpires: { type: Date },
         isVerified: { type: Boolean, default: false },
@@ -15,7 +29,7 @@ const userSchema = new Schema(
     },
     { timestamps: true }
 );
-userSchema.methods.generateAuthToken = function ():string {
+userSchema.methods.generateAuthToken = function (): string {
     if (!process.env.JWT_SECRET) {
         throw new Error("JWT_SECRET is not defined in environment variables");
     }
@@ -24,7 +38,9 @@ userSchema.methods.generateAuthToken = function ():string {
     });
     return token;
 };
-userSchema.methods.comparePassword = async function (password: string): Promise<boolean> {
+userSchema.methods.comparePassword = async function (
+    password: string
+): Promise<boolean> {
     return await bcrypt.compare(password, this.password);
 };
 

@@ -1,0 +1,9 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.generateVerificationCode = void 0;
+const generateVerificationCode = () => {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log(code);
+    return code;
+};
+exports.generateVerificationCode = generateVerificationCode;

@@ -14,5 +14,5 @@ app.get("/", (req, res) => {
     res.status(200).send({ message: "Welcome to the Brainly API" });
 });
 // middlewares and routes
-app.use('/api/v1/auth', user_route_1.default);
+app.use('/api/v1', user_route_1.default);
 exports.default = app; // Export the app instance for use in other modules
