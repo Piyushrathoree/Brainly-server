@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { verificationMail } from "./mailTemplate";
+import { forgotPasswordMail, verificationMail, welcomeBackMail } from "./mailTemplate";
 import { config } from "dotenv";
 config();
 
@@ -16,13 +16,40 @@ export const sendVerificationMail = async (
         await resend.emails.send({
             from: "onboarding@resend.dev",
             to: email,
-            subject: "Hello World",
-            html: verificationMail.replace(
-                "VERIFICATION_CODE",
-                verificationCode
-            ),
+            subject: "Email verification",
+            html: verificationMail.replace("__CODE__", verificationCode),
         });
     } catch (error) {
-        throw new Error("error while sending email");
+        throw new Error(error instanceof Error ? error.message : String(error));
     }
 };
+
+export const sendForgotPasswordMail = async (
+    email: string,
+    resetLink: string
+) => {
+    
+    try {
+        await resend.emails.send({
+            from: "onboarding@resend.dev",
+            to: email,
+            subject: "Reset password request",
+            html: forgotPasswordMail.replace("__RESET_LINK__", resetLink),
+        });
+    } catch (error) {
+        throw new Error(error instanceof Error ? error.message : String(error));
+    }
+};
+
+export const sendWelcomeBackMail = async (email: string , dashboardLink :string) => {
+    try {
+        await resend.emails.send({
+            from: "onboarding@resend.dev",
+            to: email,
+            subject: "Welcome back!",
+            html: welcomeBackMail.replace("__Dashboard_link__", dashboardLink),
+        });
+    } catch (error) {
+        throw new Error(error instanceof Error ? error.message : String(error));
+    }
+}
