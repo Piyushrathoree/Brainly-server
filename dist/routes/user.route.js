@@ -1,8 +1,16 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const user_controller_1 = require("../controllers/user.controller");
+const auth_middleware_1 = __importDefault(require("../middlewares/auth.middleware"));
 const AuthRouter = (0, express_1.Router)();
 AuthRouter.post("/register", user_controller_1.RegisterUser);
 AuthRouter.post("/login", user_controller_1.LoginUser);
+AuthRouter.post("/verify", user_controller_1.VerifyUser);
+AuthRouter.post("/forgot-password", user_controller_1.ForgotPassword);
+AuthRouter.post("/reset-password/:token", user_controller_1.ResetPassword);
+AuthRouter.post('/logout', auth_middleware_1.default, user_controller_1.LogoutUser);
 exports.default = AuthRouter;
