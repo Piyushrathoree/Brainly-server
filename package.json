@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Piyushrathoree/Brainly-server#readme",
   "dependencies": {
+    "@types/cookie-parser": "^1.4.8",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
