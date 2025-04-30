@@ -19,7 +19,7 @@ const addContent = async (req, res) => {
         link,
         type,
         userId,
-        tage: [],
+        tags: [],
     });
     await content.save();
     return res

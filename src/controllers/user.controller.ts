@@ -55,7 +55,7 @@ const RegisterUser = async (req: Request, res: Response): Promise<any> => {
         }
 
         //verificaiton email sending
-        sendVerificationMail(email, verificationCode);
+        await sendVerificationMail(email, verificationCode);
 
         const hashedPassword = bcrypt.hashSync(password, 10);
 
@@ -68,11 +68,12 @@ const RegisterUser = async (req: Request, res: Response): Promise<any> => {
         });
         await newUser.save();
         const token = newUser.generateAuthToken();
+        const userData = await User.findById(newUser._id).select('-password -verificationCode')
         res.cookie("token", token, { httpOnly: true });
         return res.status(201).json({
             message: "User registered successfully",
             token,
-            user: newUser,
+            user: userData,
         });
     } catch (error) {
         console.error("Error registering user:", error);

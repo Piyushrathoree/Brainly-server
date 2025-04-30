@@ -31,7 +31,7 @@ const RegisterUser = async (req, res) => {
                 .send({ message: "Resend API key is not set" });
         }
         //verificaiton email sending
-        (0, mail_1.sendVerificationMail)(email, verificationCode);
+        await (0, mail_1.sendVerificationMail)(email, verificationCode);
         const hashedPassword = bcryptjs_1.default.hashSync(password, 10);
         const newUser = new user_model_1.User({
             name,
@@ -42,11 +42,12 @@ const RegisterUser = async (req, res) => {
         });
         await newUser.save();
         const token = newUser.generateAuthToken();
+        const userData = await user_model_1.User.findById(newUser._id).select('-password -verificationCode');
         res.cookie("token", token, { httpOnly: true });
         return res.status(201).json({
             message: "User registered successfully",
             token,
-            user: newUser,
+            user: userData,
         });
     }
     catch (error) {

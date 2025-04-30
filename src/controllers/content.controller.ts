@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import Content from "../models/content.model";
 const addContent = async (req: Request, res: Response): Promise<any> => {
     const { title, link, type } = req.body;
+    
+    
     const userId = req.user?.id;
 
     if (!title || !link || !type) {
@@ -15,7 +17,7 @@ const addContent = async (req: Request, res: Response): Promise<any> => {
         link,
         type,
         userId,
-        tage: [],
+        tags: [],
     });
     await content.save();
     return res
