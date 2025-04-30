@@ -12,4 +12,7 @@ AuthRouter.post("/forgot-password", ForgotPassword);
 AuthRouter.post("/reset-password/:token", ResetPassword);
 AuthRouter.post('/logout',authMiddleware, LogoutUser)
 
+AuthRouter.get('/profile', authMiddleware, (req, res) => {
+    res.status(200).json({ user: req.user?.id });
+});
 export default AuthRouter;

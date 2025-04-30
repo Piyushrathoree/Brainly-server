@@ -8,7 +8,7 @@ import {
     sendWelcomeBackMail,
 } from "../mail/mail";
 import crypto from "crypto";
-import jwt from "jsonwebtoken";
+
 declare global {
     namespace Express {
         interface Request {
@@ -22,6 +22,7 @@ declare global {
                 verificationCodeExpires?: Date;
                 resetPasswordToken?: string;
                 resetPasswordTokenExpires?: Date;
+                id?: string;
             };
             token?: string;
         }
@@ -101,10 +102,13 @@ const LoginUser = async (req: Request, res: Response): Promise<any> => {
     await user.save();
     await sendWelcomeBackMail(email, `${process.env.CLIENT_URL}/dashboard`);
 
+    const userData = await User.findById(user._id).select(
+        "-password -verificationCode -verificationCodeExpires -resetPasswordToken -resetPasswordTokenExpires"
+    );
     return res.status(200).json({
         message: "User logged in successfully",
         token,
-        user,
+        user: userData,
     });
 };
 

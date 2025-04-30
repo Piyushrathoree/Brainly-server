@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetUserProfile = exports.LogoutUser = exports.ResetPassword = exports.ForgotPassword = exports.VerifyUser = exports.LoginUser = exports.RegisterUser = void 0;
+exports.changePassword = exports.GetUserProfile = exports.LogoutUser = exports.ResetPassword = exports.ForgotPassword = exports.VerifyUser = exports.LoginUser = exports.RegisterUser = void 0;
 const user_model_1 = require("../models/user.model");
 const utils_1 = require("../utils/utils");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -73,10 +73,11 @@ const LoginUser = async (req, res) => {
     user.lastLogin = new Date();
     await user.save();
     await (0, mail_1.sendWelcomeBackMail)(email, `${process.env.CLIENT_URL}/dashboard`);
+    const userData = await user_model_1.User.findById(user._id).select("-password -verificationCode -verificationCodeExpires -resetPasswordToken -resetPasswordTokenExpires");
     return res.status(200).json({
         message: "User logged in successfully",
         token,
-        user,
+        user: userData,
     });
 };
 exports.LoginUser = LoginUser;
@@ -123,7 +124,7 @@ const ForgotPassword = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "password reset link has been sent to your email",
-            resetPasswordToken
+            resetPasswordToken,
         });
     }
     catch (error) {
@@ -160,6 +161,30 @@ const ResetPassword = async (req, res) => {
     }
 };
 exports.ResetPassword = ResetPassword;
+const changePassword = async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+        return res.status(400).send({ message: "All fields are required" });
+    }
+    try {
+        const user = await user_model_1.User.findById(req.user?._id);
+        if (!user) {
+            return res.status(404).send({ message: "User not found" });
+        }
+        const isMatch = await user.comparePassword(oldPassword);
+        if (!isMatch) {
+            return res.status(400).send({ message: "Invalid credentials" });
+        }
+        user.password = bcryptjs_1.default.hashSync(newPassword, 10);
+        await user.save();
+        res.status(200).json({ message: "Password changed successfully" });
+    }
+    catch (error) {
+        console.error("Error changing password:", error);
+        return res.status(500).send({ message: "Internal server error" });
+    }
+};
+exports.changePassword = changePassword;
 const LogoutUser = async (req, res) => {
     res.clearCookie("token");
     return res.status(200).json({ message: "User logged out successfully" });

@@ -19,7 +19,7 @@ const userSchema = new Schema<IUser>(
     {
         name: { type: String, required: true },
         email: { type: String, required: true },
-        password: { type: String, required: true },
+        password: { type: String, required: true , },
         verificationCode: { type: String },
         verificationCodeExpires: { type: Date },
         resetPasswordToken: { type: String },
