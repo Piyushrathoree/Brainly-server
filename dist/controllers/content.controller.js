@@ -18,7 +18,7 @@ const addContent = async (req, res) => {
         title,
         link,
         type,
-        user: userId,
+        userId,
         tage: [],
     });
     await content.save();
@@ -59,10 +59,7 @@ const updateContent = async (req, res) => {
     if (!id) {
         return res.status(404).json("id not found");
     }
-    const updatedContent = await content_model_1.default.findByIdAndUpdate(id, {
-        ...(title && { title }),
-        ...(link && { link }),
-    }, { new: true });
+    const updatedContent = await content_model_1.default.findByIdAndUpdate(id, { ...(title && { title }), ...(link && { link }) }, { new: true });
     if (!updatedContent) {
         return res
             .status(401)

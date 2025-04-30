@@ -14,7 +14,7 @@ const addContent = async (req: Request, res: Response): Promise<any> => {
         title,
         link,
         type,
-        user: userId,
+        userId,
         tage: [],
     });
     await content.save();
@@ -58,10 +58,7 @@ const updateContent = async (req: Request, res: Response): Promise<any> => {
     }
     const updatedContent = await Content.findByIdAndUpdate(
         id,
-        {
-            ...(title && { title }),
-            ...(link && { link }),
-        },
+        { ...(title && { title }), ...(link && { link }) },
         { new: true }
     );
     if (!updatedContent) {
