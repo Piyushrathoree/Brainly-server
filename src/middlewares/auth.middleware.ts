@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import cookieParser from "cookie-parser";
+
 
 const authMiddleware = (
     req: Request,
