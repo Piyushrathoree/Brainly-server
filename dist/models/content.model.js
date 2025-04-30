@@ -10,7 +10,7 @@ const contentOptions = [
     "other",
 ];
 const contentSchema = new mongoose_1.Schema({
-    link: { type: String, required: true },
+    link: { type: String, required: true, unique: true },
     title: { type: String, required: true },
     type: { type: String, enum: contentOptions, required: true },
     createdAt: { type: Date, default: Date.now },

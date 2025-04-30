@@ -1,23 +1,32 @@
 import { Request, Response } from "express";
 import Content from "../models/content.model";
+import Tag from "../models/tag.model";
 const addContent = async (req: Request, res: Response): Promise<any> => {
     const { title, link, type } = req.body;
-    
-    
     const userId = req.user?.id;
-
+    const tags = req.body.tags || [];
+    if (!tags || !Array.isArray(tags)) {
+        return res.status(400).json({ message: "Tags must be an array" });
+    }
     if (!title || !link || !type) {
         return res.status(400).json({ message: "All fields are required" });
     }
     if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
     }
+    const existingContent = await Content.findOne({ link });
+    if (existingContent) {
+        return res.status(400).json({ message: "Content already exists" });
+    }
+    const tag = await Tag.find({ title: { $in: tags } }); 
+    const tagIds = tag.map(tag => tag._id);
+
     const content = new Content({
         title,
         link,
         type,
         userId,
-        tags: [],
+        tags: tagIds
     });
     await content.save();
     return res

@@ -5,21 +5,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteContent = exports.updateContent = exports.getContentById = exports.getContentByUserId = exports.addContent = exports.getContent = void 0;
 const content_model_1 = __importDefault(require("../models/content.model"));
+const tag_model_1 = __importDefault(require("../models/tag.model"));
 const addContent = async (req, res) => {
     const { title, link, type } = req.body;
     const userId = req.user?.id;
+    const tags = req.body.tags || [];
+    if (!tags || !Array.isArray(tags)) {
+        return res.status(400).json({ message: "Tags must be an array" });
+    }
     if (!title || !link || !type) {
         return res.status(400).json({ message: "All fields are required" });
     }
     if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
     }
+    const existingContent = await content_model_1.default.findOne({ link });
+    if (existingContent) {
+        return res.status(400).json({ message: "Content already exists" });
+    }
+    const tag = await tag_model_1.default.find({ title: { $in: tags } });
+    const tagIds = tag.map(tag => tag._id);
     const content = new content_model_1.default({
         title,
         link,
         type,
         userId,
-        tags: [],
+        tags: tagIds
     });
     await content.save();
     return res
