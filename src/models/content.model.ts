@@ -15,7 +15,7 @@ const contentSchema = new Schema(
         type: { type: String, enum: contentOptions, required: true },
         createdAt: { type: Date, default: Date.now },
         updatedAt: { type: Date, default: Date.now },
-        user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
         tags: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
     },
     {

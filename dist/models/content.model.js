@@ -15,7 +15,7 @@ const contentSchema = new mongoose_1.Schema({
     type: { type: String, enum: contentOptions, required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
-    user: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
+    userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     tags: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Tag" }],
 }, {
     timestamps: true,
