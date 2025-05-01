@@ -243,6 +243,7 @@ const GetUserProfile = async (req: Request, res: Response): Promise<any> => {
     }
 };
 
+
 export {
     RegisterUser,
     LoginUser,
