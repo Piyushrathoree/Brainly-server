@@ -81,7 +81,6 @@ const updateContent = async (req: Request, res: Response): Promise<any> => {
         .status(201)
         .json({ message: "content updated successfully ", updateContent });
 };
-
 const getContentById = async (req: Request, res: Response): Promise<any> => {
     const { id } = req.params;
     if (!id) {
