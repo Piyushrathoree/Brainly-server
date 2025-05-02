@@ -13,7 +13,6 @@ AuthRouter.post("/verify", user_controller_1.VerifyUser);
 AuthRouter.post("/forgot-password", user_controller_1.ForgotPassword);
 AuthRouter.post("/reset-password/:token", user_controller_1.ResetPassword);
 AuthRouter.post('/logout', auth_middleware_1.default, user_controller_1.LogoutUser);
-AuthRouter.get('/profile', auth_middleware_1.default, (req, res) => {
-    res.status(200).json({ user: req.user?.id });
-});
+AuthRouter.put("/share/toggle", auth_middleware_1.default, user_controller_1.toggleShare);
+AuthRouter.get('/profile', auth_middleware_1.default, user_controller_1.GetUserProfile);
 exports.default = AuthRouter;

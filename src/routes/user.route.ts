@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ForgotPassword, LoginUser, LogoutUser, RegisterUser, ResetPassword, VerifyUser } from "../controllers/user.controller";
+import { ForgotPassword, GetUserProfile, LoginUser, LogoutUser, RegisterUser, ResetPassword, toggleShare, VerifyUser } from "../controllers/user.controller";
 import authMiddleware from "../middlewares/auth.middleware";
 
 
@@ -11,8 +11,7 @@ AuthRouter.post("/verify", VerifyUser);
 AuthRouter.post("/forgot-password", ForgotPassword);
 AuthRouter.post("/reset-password/:token", ResetPassword);
 AuthRouter.post('/logout',authMiddleware, LogoutUser)
+AuthRouter.put("/share/toggle",authMiddleware,toggleShare)
 
-AuthRouter.get('/profile', authMiddleware, (req, res) => {
-    res.status(200).json({ user: req.user?.id });
-});
+AuthRouter.get('/profile', authMiddleware,GetUserProfile);
 export default AuthRouter;

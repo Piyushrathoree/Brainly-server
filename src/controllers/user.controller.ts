@@ -100,6 +100,7 @@ const LoginUser = async (req: Request, res: Response): Promise<any> => {
     const token = user.generateAuthToken();
     res.cookie("token", token, { httpOnly: true });
     user.lastLogin = new Date();
+    user.isPublic = false
     await user.save();
     await sendWelcomeBackMail(email, `${process.env.CLIENT_URL}/dashboard`);
 
@@ -230,7 +231,8 @@ const LogoutUser = async (req: Request, res: Response): Promise<any> => {
 
 const GetUserProfile = async (req: Request, res: Response): Promise<any> => {
     try {
-        const user = await User.findById(req.user?._id).select(
+
+        const user = await User.findById(req.user?.id).select(
             "-password -verificationCode -verificationCodeExpires -resetPasswordToken -resetPasswordTokenExpires"
         );
         if (!user) {
@@ -243,6 +245,31 @@ const GetUserProfile = async (req: Request, res: Response): Promise<any> => {
     }
 };
 
+const toggleShare = async (req: Request, res: Response): Promise<any> => {
+    const id = req.user?.id;
+
+    if (!id) {
+        return res.status(401).json({ message: "unauthorized" })
+    }
+    try {
+        const user = await User.findById(id)
+        if (!user) {
+            return res.status(404).json({ message: "user not found " })
+        }
+        user.isPublic = !user.isPublic;
+        console.log(user.isPublic);
+        
+        await user.save()
+
+        return res.status(201).json({
+            message: "your profile is now changed",
+            publicURL: `http://localhost:5173/share/${id}`
+        })
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        return res.status(500).send({ message: "Internal server error" });
+    }
+}
 
 export {
     RegisterUser,
@@ -253,4 +280,5 @@ export {
     LogoutUser,
     GetUserProfile,
     changePassword,
+    toggleShare
 };

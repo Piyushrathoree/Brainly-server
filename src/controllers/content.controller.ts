@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Content from "../models/content.model";
 import Tag from "../models/tag.model";
+import { User } from "../models/user.model";
 const addContent = async (req: Request, res: Response): Promise<any> => {
     const { title, link, type } = req.body;
     const userId = req.user?.id;
@@ -18,7 +19,7 @@ const addContent = async (req: Request, res: Response): Promise<any> => {
     if (existingContent) {
         return res.status(400).json({ message: "Content already exists" });
     }
-    const tag = await Tag.find({ title: { $in: tags } }); 
+    const tag = await Tag.find({ title: { $in: tags } });
     const tagIds = tag.map(tag => tag._id);
 
     const content = new Content({
@@ -34,15 +35,17 @@ const addContent = async (req: Request, res: Response): Promise<any> => {
         .json({ message: "Content created successfully", content });
 };
 
-const getContent = async (req: Request, res: Response): Promise<any> => {
-    const content = await Content.find();
-    if (content === undefined) {
-        return res.status(404).json({ message: "no content found" });
-    }
-    return res
-        .status(200)
-        .json({ message: "all content fetched successfully ", content });
-};
+//controller for admin 
+
+// const getContent = async (req: Request, res: Response): Promise<any> => {
+//     const content = await Content.find();
+//     if (content === undefined) {
+//         return res.status(404).json({ message: "no content found" });
+//     }
+//     return res
+//         .status(200)
+//         .json({ message: "all content fetched successfully ", content });
+// };
 
 const deleteContent = async (req: Request, res: Response): Promise<any> => {
     const { id } = req.params;
@@ -115,12 +118,24 @@ const getContentByUserId = async (
     });
 };
 
+const getPublicContentByUser = async (req: Request, res: Response): Promise<any> => {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user || !user.isPublic) {
+        return res.status(403).json({ message: "This user's content is private" });
+    }
+
+    const content = await Content.find({ userId }).populate("tags", "title");
+    return res.status(200).json(content);
+};
 
 export {
-    getContent,
+    // getContent,
     addContent,
     getContentByUserId,
     getContentById,
     updateContent,
     deleteContent,
+    getPublicContentByUser
 };

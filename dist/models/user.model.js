@@ -17,6 +17,7 @@ const userSchema = new mongoose_1.Schema({
     resetPasswordTokenExpires: { type: Date },
     isVerified: { type: Boolean, default: false },
     lastLogin: { type: Date, default: Date.now },
+    isPublic: { type: Boolean, default: false }
 }, { timestamps: true });
 userSchema.methods.generateAuthToken = function () {
     if (!process.env.JWT_SECRET) {

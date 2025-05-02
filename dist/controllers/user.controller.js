@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changePassword = exports.GetUserProfile = exports.LogoutUser = exports.ResetPassword = exports.ForgotPassword = exports.VerifyUser = exports.LoginUser = exports.RegisterUser = void 0;
+exports.toggleShare = exports.changePassword = exports.GetUserProfile = exports.LogoutUser = exports.ResetPassword = exports.ForgotPassword = exports.VerifyUser = exports.LoginUser = exports.RegisterUser = void 0;
 const user_model_1 = require("../models/user.model");
 const utils_1 = require("../utils/utils");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -72,6 +72,7 @@ const LoginUser = async (req, res) => {
     const token = user.generateAuthToken();
     res.cookie("token", token, { httpOnly: true });
     user.lastLogin = new Date();
+    user.isPublic = false;
     await user.save();
     await (0, mail_1.sendWelcomeBackMail)(email, `${process.env.CLIENT_URL}/dashboard`);
     const userData = await user_model_1.User.findById(user._id).select("-password -verificationCode -verificationCodeExpires -resetPasswordToken -resetPasswordTokenExpires");
@@ -193,7 +194,7 @@ const LogoutUser = async (req, res) => {
 exports.LogoutUser = LogoutUser;
 const GetUserProfile = async (req, res) => {
     try {
-        const user = await user_model_1.User.findById(req.user?._id).select("-password -verificationCode -verificationCodeExpires -resetPasswordToken -resetPasswordTokenExpires");
+        const user = await user_model_1.User.findById(req.user?.id).select("-password -verificationCode -verificationCodeExpires -resetPasswordToken -resetPasswordTokenExpires");
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -205,3 +206,27 @@ const GetUserProfile = async (req, res) => {
     }
 };
 exports.GetUserProfile = GetUserProfile;
+const toggleShare = async (req, res) => {
+    const id = req.user?.id;
+    if (!id) {
+        return res.status(401).json({ message: "unauthorized" });
+    }
+    try {
+        const user = await user_model_1.User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: "user not found " });
+        }
+        user.isPublic = !user.isPublic;
+        console.log(user.isPublic);
+        await user.save();
+        return res.status(201).json({
+            message: "your profile is now changed",
+            publicURL: `http://localhost:5173/share/${id}`
+        });
+    }
+    catch (error) {
+        console.error("Error fetching user profile:", error);
+        return res.status(500).send({ message: "Internal server error" });
+    }
+};
+exports.toggleShare = toggleShare;
