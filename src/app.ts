@@ -32,9 +32,9 @@ app.use(passport.session());
 
 
 app.get("/", (_, res) => {
-    res.send(`<h2>Home</h2><a href="/auth/google">Login with Google</a><br/><a href="/auth/github">Login with GitHub</a>`);
+    res.send(`<h2>Home</h2><a href="/oauth/google">Login with Google</a><br/><a href="/oauth/github">Login with GitHub</a>`);
 });
-app.use("/auth", router)
+app.use("/oauth", router)
 
 // middlewares and routes
 app.use("/api/v1", AuthRouter);

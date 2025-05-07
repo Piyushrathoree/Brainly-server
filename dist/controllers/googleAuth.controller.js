@@ -68,19 +68,19 @@ passport_1.default.use(new passport_github2_1.Strategy({
 }));
 const googleCallback = (req, res) => {
     const user = req.user;
-    res.redirect(`http://localhost:5173/dashboard?user=${user.name}`);
+    res.json({ message: `you have been successfully signed up `, user });
 };
 exports.googleCallback = googleCallback;
 const githubCallback = (req, res) => {
     const user = req.user;
-    res.redirect(`http://localhost:5173/dashboard?user=${user.name}`);
+    res.json({ message: `you have been successfully signed up `, user });
 };
 exports.githubCallback = githubCallback;
 const logout = (req, res) => {
     req.logout(err => {
         if (err)
             return res.status(500).send("Logout error.");
-        res.redirect("http://localhost:5173");
+        res.send("<h1>you have been logged out </h1>");
     });
 };
 exports.logout = logout;

@@ -77,17 +77,18 @@ import { Request, Response } from "express";
 
 export const googleCallback = (req: Request, res: Response) => {
     const user = req.user as any;
-    res.redirect(`http://localhost:5173/dashboard?user=${user.name}`);
-};
+    res.json({message:`you have been successfully signed up ` , user});
+};  
 
 export const githubCallback = (req: Request, res: Response) => {
     const user = req.user as any;
-    res.redirect(`http://localhost:5173/dashboard?user=${user.name}`);
+    res.json({ message: `you have been successfully signed up `, user });
+
 };
 
 export const logout = (req: Request, res: Response) => {
     req.logout(err => {
         if (err) return res.status(500).send("Logout error.");
-        res.redirect("http://localhost:5173");
+        res.send("<h1>you have been logged out </h1>")
     });
 };
