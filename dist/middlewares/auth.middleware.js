@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ensureAuthenticated = ensureAuthenticated;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const authMiddleware = (req, res, next) => {
     const token = req.cookies?.token;
@@ -36,4 +37,9 @@ const authMiddleware = (req, res, next) => {
         return;
     }
 };
+function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated())
+        return next();
+    res.redirect("/");
+}
 exports.default = authMiddleware;

@@ -263,7 +263,7 @@ const toggleShare = async (req: Request, res: Response): Promise<any> => {
 
         return res.status(201).json({
             message: "your profile is now changed",
-            publicURL: `http://localhost:5173/share/${id}`
+            publicURL: `https://app-brainly-peach.vercel.app/share/${id}`
         })
     } catch (error) {
         console.error("Error fetching user profile:", error);
