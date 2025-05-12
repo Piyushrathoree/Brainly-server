@@ -52,7 +52,12 @@ const app = (0, express_1.default)();
 app.use((0, cookie_parser_1.default)()); // Middleware to parse cookies
 app.use(express_1.default.json()); // Middleware to parse JSON requests
 app.use(express_1.default.urlencoded({ extended: true })); // Middleware to parse URL-encoded requests
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use((0, express_session_1.default)({
     secret: process.env.SESSION_SECRET,
     resave: false,

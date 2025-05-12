@@ -32,7 +32,10 @@ const RegisterUser = async (req, res) => {
                 .send({ message: "Resend API key is not set" });
         }
         //verificaiton email sending
-        await (0, mail_1.sendVerificationMail)(email, verificationCode);
+        const data = await (0, mail_1.sendRegisterMail)(email, verificationCode);
+        if (data == null) {
+            return res.status(402).json({ message: "sending email failed" });
+        }
         const hashedPassword = bcryptjs_1.default.hashSync(password, 10);
         const newUser = new user_model_1.User({
             name,
@@ -44,7 +47,12 @@ const RegisterUser = async (req, res) => {
         await newUser.save();
         const token = newUser.generateAuthToken();
         const userData = await user_model_1.User.findById(newUser._id).select('-password -verificationCode');
-        res.cookie("token", token, { httpOnly: true });
+        res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: 'none',
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
+        });
         return res.status(201).json({
             message: "User registered successfully",
             token,
@@ -71,7 +79,12 @@ const LoginUser = async (req, res) => {
         return res.status(400).send({ message: "Invalid credentials" });
     }
     const token = user.generateAuthToken();
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
+    });
     user.lastLogin = new Date();
     user.isPublic = false;
     await user.save();

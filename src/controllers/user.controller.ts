@@ -4,7 +4,7 @@ import { generateVerificationCode } from "../utils/utils";
 import bcrypt from "bcryptjs";
 import {
     sendForgotPasswordMail,
-    sendVerificationMail,
+    sendRegisterMail,
     sendWelcomeBackMail,
 } from "../mail/mail";
 import crypto from "crypto";
@@ -31,8 +31,8 @@ declare global {
 const RegisterUser = async (req: Request, res: Response): Promise<any> => {
     try {
         const { name, email, password } = req.body;
-        console.log(name,email,password);
-        
+        console.log(name, email, password);
+
         if (!name || !email || !password) {
             return res.status(400).send({ message: "All fields are required" });
         }
@@ -57,8 +57,11 @@ const RegisterUser = async (req: Request, res: Response): Promise<any> => {
         }
 
         //verificaiton email sending
-        await sendVerificationMail(email, verificationCode);
-
+        const data = await sendRegisterMail(email, verificationCode);
+        if(data==null){
+            return res.status(402).json({message:"sending email failed"})
+        }
+        
         const hashedPassword = bcrypt.hashSync(password, 10);
 
         const newUser = new User({
@@ -71,7 +74,12 @@ const RegisterUser = async (req: Request, res: Response): Promise<any> => {
         await newUser.save();
         const token = newUser.generateAuthToken();
         const userData = await User.findById(newUser._id).select('-password -verificationCode')
-        res.cookie("token", token, { httpOnly: true });
+        res.cookie("token", token, { 
+            httpOnly: true,
+            sameSite: 'none', 
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
+        });
         return res.status(201).json({
             message: "User registered successfully",
             token,
@@ -100,7 +108,12 @@ const LoginUser = async (req: Request, res: Response): Promise<any> => {
     }
 
     const token = user.generateAuthToken();
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, { 
+        httpOnly: true,
+        sameSite: 'none', 
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
+    });
     user.lastLogin = new Date();
     user.isPublic = false
     await user.save();
@@ -260,7 +273,7 @@ const toggleShare = async (req: Request, res: Response): Promise<any> => {
         }
         user.isPublic = !user.isPublic;
         console.log(user.isPublic);
-        
+
         await user.save()
 
         return res.status(201).json({
@@ -284,3 +297,4 @@ export {
     changePassword,
     toggleShare
 };
+

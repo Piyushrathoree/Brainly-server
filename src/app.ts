@@ -19,7 +19,12 @@ const app = express();
 app.use(cookieParser()); // Middleware to parse cookies
 app.use(express.json()); // Middleware to parse JSON requests
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded requests
-app.use(cors());
+app.use(cors({
+  origin:  'http://localhost:5173' ,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(session({
     secret: process.env.SESSION_SECRET!,
