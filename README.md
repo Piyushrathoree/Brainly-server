@@ -1,9 +1,3 @@
-<style>
-  * {
-    font-family: "SF Mono", "JetBrains Mono", monospace !important;
-  }
-</style>
-
 # Brainly Server API Documentation
 
 A RESTful API for managing content bookmarking and sharing with user authentication.
