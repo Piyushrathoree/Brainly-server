@@ -1,4 +1,3 @@
-import { Resend } from "resend";
 import { forgotPasswordMail, verificationMail, welcomeBackMail } from "./mailTemplate";
 import { config } from "dotenv";
 config();
