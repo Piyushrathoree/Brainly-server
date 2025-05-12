@@ -65,9 +65,9 @@ app.use((0, express_session_1.default)({
 }));
 app.use(passport_1.default.initialize());
 app.use(passport_1.default.session());
-app.get("/", (_, res) => {
-    res.send(`<h2>Home</h2><a href="/oauth/google">Login with Google</a><br/><a href="/oauth/github">Login with GitHub</a>`);
-});
+// app.get("/", (_, res) => {
+//     res.send(`<h2>Home</h2><a href="/oauth/google">Login with Google</a><br/><a href="/oauth/github">Login with GitHub</a>`);
+// });
 app.use("/oauth", user_route_1.router);
 // middlewares and routes
 app.use("/api/v1", user_route_1.default);

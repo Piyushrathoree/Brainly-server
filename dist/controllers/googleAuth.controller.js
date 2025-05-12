@@ -9,6 +9,7 @@ const passport_google_oauth20_1 = require("passport-google-oauth20");
 const passport_github2_1 = require("passport-github2");
 const dotenv_1 = __importDefault(require("dotenv"));
 const oAuth_model_1 = require("../models/oAuth.model");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 dotenv_1.default.config();
 passport_1.default.serializeUser((user, done) => {
     done(null, user._id);
@@ -68,19 +69,25 @@ passport_1.default.use(new passport_github2_1.Strategy({
 }));
 const googleCallback = (req, res) => {
     const user = req.user;
-    res.json({ message: `you have been successfully signed up `, user });
+    // Create a JWT token for the user
+    const token = jsonwebtoken_1.default.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET || 'your-jwt-secret', { expiresIn: '7d' });
+    // Redirect to frontend with token
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/callback?token=${token}`);
 };
 exports.googleCallback = googleCallback;
 const githubCallback = (req, res) => {
     const user = req.user;
-    res.json({ message: `you have been successfully signed up `, user });
+    // Create a JWT token for the user
+    const token = jsonwebtoken_1.default.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET || 'your-jwt-secret', { expiresIn: '7d' });
+    // Redirect to frontend with token
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/callback?token=${token}`);
 };
 exports.githubCallback = githubCallback;
 const logout = (req, res) => {
     req.logout(err => {
         if (err)
             return res.status(500).send("Logout error.");
-        res.send("<h1>you have been logged out </h1>");
+        res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login`);
     });
 };
 exports.logout = logout;

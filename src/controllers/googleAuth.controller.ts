@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import dotenv from "dotenv";
 import { AuthUser } from "../models/oAuth.model";
+import jwt from "jsonwebtoken";
 dotenv.config();
 
 passport.serializeUser((user, done) => {
@@ -77,18 +78,35 @@ import { Request, Response } from "express";
 
 export const googleCallback = (req: Request, res: Response) => {
     const user = req.user as any;
-    res.json({message:`you have been successfully signed up ` , user});
+    
+    // Create a JWT token for the user
+    const token = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET || 'your-jwt-secret',
+        { expiresIn: '7d' }
+    );
+    
+    // Redirect to frontend with token
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/callback?token=${token}`);
 };  
 
 export const githubCallback = (req: Request, res: Response) => {
     const user = req.user as any;
-    res.json({ message: `you have been successfully signed up `, user });
-
+    
+    // Create a JWT token for the user
+    const token = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET || 'your-jwt-secret',
+        { expiresIn: '7d' }
+    );
+    
+    // Redirect to frontend with token
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/callback?token=${token}`);
 };
 
 export const logout = (req: Request, res: Response) => {
     req.logout(err => {
         if (err) return res.status(500).send("Logout error.");
-        res.send("<h1>you have been logged out </h1>")
+        res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login`);
     });
 };
