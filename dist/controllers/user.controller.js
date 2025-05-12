@@ -12,6 +12,7 @@ const crypto_1 = __importDefault(require("crypto"));
 const RegisterUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
+        console.log(name, email, password);
         if (!name || !email || !password) {
             return res.status(400).send({ message: "All fields are required" });
         }

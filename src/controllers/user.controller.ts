@@ -31,6 +31,8 @@ declare global {
 const RegisterUser = async (req: Request, res: Response): Promise<any> => {
     try {
         const { name, email, password } = req.body;
+        console.log(name,email,password);
+        
         if (!name || !email || !password) {
             return res.status(400).send({ message: "All fields are required" });
         }

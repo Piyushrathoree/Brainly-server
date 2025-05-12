@@ -7,12 +7,14 @@ const authMiddleware = (
     res: Response,
     next: NextFunction
 ): void => {
-    const token = req.cookies?.token;
+    const token = req.cookies?.token || req.headers.authorization?.split(" ")[1];
     
     if (!token) {
         res.status(401).json({ message: "Unauthorized" });
         return;
     }
+   
+    
     try {
         if (!process.env.JWT_SECRET) {
             throw new Error(
