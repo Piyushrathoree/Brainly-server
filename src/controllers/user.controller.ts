@@ -68,12 +68,7 @@ const RegisterUser = async (req: Request, res: Response): Promise<any> => {
         await newUser.save();
         const token = newUser.generateAuthToken();
         const userData = await User.findById(newUser._id).select('-password -verificationCode')
-        res.cookie("token", token, { 
-            httpOnly: true,
-            sameSite: 'none', 
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
-        });
+        
         return res.status(201).json({
             message: "User registered successfully",
             token,
@@ -102,12 +97,7 @@ const LoginUser = async (req: Request, res: Response): Promise<any> => {
     }
 
     const token = user.generateAuthToken();
-    res.cookie("token", token, { 
-        httpOnly: true,
-        sameSite: 'none', 
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
-    });
+    
     user.lastLogin = new Date();
     user.isPublic = false
     await user.save();
