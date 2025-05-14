@@ -14,22 +14,22 @@ const RegisterUser = async (req, res) => {
         const { name, email, password } = req.body;
         console.log(name, email, password);
         if (!name || !email || !password) {
-            return res.status(400).send({ message: "All fields are required" });
+            return res.status(400).json({ message: "All fields are required" });
         }
         const existingUser = await user_model_1.User.findOne({ email });
         if (existingUser) {
-            return res.status(400).send({ message: "User already exists" });
+            return res.status(409).json({ message: "User already exists" });
         }
         const verificationCode = (0, utils_1.generateVerificationCode)();
         if (!verificationCode) {
             return res
                 .status(500)
-                .send({ message: "Failed to generate verification code" });
+                .json({ message: "Failed to generate verification code" });
         }
         //verificaiton email sending
         const data = await (0, mail_1.sendRegisterMail)(email, verificationCode);
         if (data == null) {
-            return res.status(402).json({ message: "sending email failed" });
+            return res.status(503).json({ message: "Email service unavailable" });
         }
         const hashedPassword = bcryptjs_1.default.hashSync(password, 10);
         const newUser = new user_model_1.User({
@@ -56,22 +56,22 @@ const RegisterUser = async (req, res) => {
     }
     catch (error) {
         console.error("Error registering user:", error);
-        return res.status(500).send({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
 exports.RegisterUser = RegisterUser;
 const LoginUser = async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
-        return res.status(400).send({ message: "All fields are required" });
+        return res.status(400).json({ message: "All fields are required" });
     }
     const user = await user_model_1.User.findOne({ email });
     if (!user) {
-        return res.status(400).send({ message: "User not found" });
+        return res.status(404).json({ message: "User not found" });
     }
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-        return res.status(400).send({ message: "Invalid credentials" });
+        return res.status(401).json({ message: "Invalid credentials" });
     }
     const token = user.generateAuthToken();
     res.cookie("token", token, {
@@ -97,21 +97,21 @@ const VerifyUser = async (req, res) => {
     if (!verificationCode) {
         return res
             .status(400)
-            .send({ message: "Verification code is required" });
+            .json({ message: "Verification code is required" });
     }
     try {
         const user = await user_model_1.User.findOne({ verificationCode });
         if (!user) {
-            return res.status(400).send({ message: "User not found" });
+            return res.status(404).json({ message: "User not found" });
         }
         user.isVerified = true;
         user.verificationCode = undefined;
         user.verificationCodeExpires = undefined;
         await user.save();
-        return res.status(201).json({ message: "you're verified now " });
+        return res.status(200).json({ message: "You're verified now" });
     }
     catch (error) {
-        throw new Error(error instanceof Error ? error.message : "An unknown error occurred");
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
 exports.VerifyUser = VerifyUser;
@@ -218,24 +218,23 @@ exports.GetUserProfile = GetUserProfile;
 const toggleShare = async (req, res) => {
     const id = req.user?.id;
     if (!id) {
-        return res.status(401).json({ message: "unauthorized" });
+        return res.status(401).json({ message: "Unauthorized" });
     }
     try {
         const user = await user_model_1.User.findById(id);
         if (!user) {
-            return res.status(404).json({ message: "user not found " });
+            return res.status(404).json({ message: "User not found" });
         }
         user.isPublic = !user.isPublic;
         console.log(user.isPublic);
         await user.save();
-        return res.status(201).json({
-            message: "your profile is now changed",
+        return res.status(200).json({
+            message: "Your profile visibility has been updated",
             publicURL: `https://app-brainly-peach.vercel.app/share/${id}`
         });
     }
     catch (error) {
-        console.error("Error fetching user profile:", error);
-        return res.status(500).send({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
 exports.toggleShare = toggleShare;
