@@ -34,7 +34,7 @@ const RegisterUser = async (req: Request, res: Response): Promise<any> => {
         console.log(name, email, password);
 
         if (!name || !email || !password) {
-            return res.status(400).json({ message: "All fields are required" });
+                return res.status(400).json({ message: "All fields are required" });
         }
 
         const existingUser = await User.findOne({ email });
