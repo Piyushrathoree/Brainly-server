@@ -50,12 +50,6 @@ const RegisterUser = async (req: Request, res: Response): Promise<any> => {
                 .send({ message: "Failed to generate verification code" });
         }
 
-        if (process.env.RESEND_API_KEY === undefined) {
-            return res
-                .status(500)
-                .send({ message: "Resend API key is not set" });
-        }
-
         //verificaiton email sending
         const data = await sendRegisterMail(email, verificationCode);
         if(data==null){
