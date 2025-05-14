@@ -26,11 +26,6 @@ const RegisterUser = async (req, res) => {
                 .status(500)
                 .send({ message: "Failed to generate verification code" });
         }
-        if (process.env.RESEND_API_KEY === undefined) {
-            return res
-                .status(500)
-                .send({ message: "Resend API key is not set" });
-        }
         //verificaiton email sending
         const data = await (0, mail_1.sendRegisterMail)(email, verificationCode);
         if (data == null) {
