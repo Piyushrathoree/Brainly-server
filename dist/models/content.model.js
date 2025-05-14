@@ -2,12 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const contentOptions = [
-    "youtube",
     "tweet",
     "image",
-    "article",
-    "blog",
-    "other",
+    "document",
+    "video",
+    "note",
 ];
 const contentSchema = new mongoose_1.Schema({
     link: { type: String, required: true, unique: true },

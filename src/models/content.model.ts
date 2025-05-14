@@ -1,12 +1,11 @@
 import { Schema, model } from "mongoose";
 
 const contentOptions: string[] = [
-    "youtube",
     "tweet",
     "image",
-    "article",
-    "blog",
-    "other",
+    "document",
+    "video",
+    "note",
 ];
 const contentSchema = new Schema(
     {

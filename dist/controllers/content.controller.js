@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPublicContentByUser = exports.deleteContent = exports.updateContent = exports.getContentById = exports.getContentByUserId = exports.addContent = void 0;
+exports.GetAllContent = exports.getPublicContentByUser = exports.deleteContent = exports.updateContent = exports.getContentById = exports.getContentByUserId = exports.addContent = void 0;
 const content_model_1 = __importDefault(require("../models/content.model"));
 const tag_model_1 = __importDefault(require("../models/tag.model"));
 const user_model_1 = require("../models/user.model");
@@ -113,6 +113,16 @@ const getContentByUserId = async (req, res) => {
     });
 };
 exports.getContentByUserId = getContentByUserId;
+const GetAllContent = async (req, res) => {
+    const content = await content_model_1.default.find();
+    if (content === undefined) {
+        return res.status(404).json({ message: "no content found" });
+    }
+    return res
+        .status(200)
+        .json({ message: "all content fetched successfully ", content });
+};
+exports.GetAllContent = GetAllContent;
 const getPublicContentByUser = async (req, res) => {
     const { userId } = req.params;
     const user = await user_model_1.User.findById(userId);
