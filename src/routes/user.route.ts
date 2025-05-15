@@ -15,9 +15,12 @@ AuthRouter.post("/forgot-password", ForgotPassword);
 AuthRouter.post("/reset-password/:token", ResetPassword);
 AuthRouter.post('/logout', authMiddleware, LogoutUser)
 AuthRouter.put("/share/toggle", authMiddleware, toggleShare)
-
 AuthRouter.get('/profile', authMiddleware, GetUserProfile);
-
+AuthRouter.get('/protected', authMiddleware, (req, res) => {
+    req.user
+        ? res.status(200).json({ message: "Protected route accessed" })
+        : res.status(401).json({ message: "Unauthorized" });
+});
 //oauth authentication
 
 const router = Router()
