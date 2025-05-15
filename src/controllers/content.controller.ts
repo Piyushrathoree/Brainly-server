@@ -2,22 +2,24 @@ import { Request, Response } from "express";
 import Content from "../models/content.model";
 import Tag from "../models/tag.model";
 import { User } from "../models/user.model";
+import mongoose from "mongoose";
 
 
 const addContent = async (req: Request, res: Response): Promise<any> => {
-    const { title, link, type } = req.body;
+    const { title, link, type ,description} = req.body;
     const userId = req.user?.id;
     const tags = req.body.tags || [];
+
     if (!tags || !Array.isArray(tags)) {
         return res.status(400).json({ message: "Tags must be an array" });
     }
-    if (!title || !link || !type) {
+    if (!title || !type) {
         return res.status(400).json({ message: "All fields are required" });
     }
     if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
     }
-    const existingContent = await Content.findOne({ link });
+    const existingContent = await Content.findOne({ title });
     if (existingContent) {
         return res.status(400).json({ message: "Content already exists" });
     }
@@ -29,7 +31,8 @@ const addContent = async (req: Request, res: Response): Promise<any> => {
         link,
         type,
         userId,
-        tags: tagIds
+        tags: tagIds,
+        content: description,
     });
     await content.save();
     return res
@@ -67,25 +70,38 @@ const deleteContent = async (req: Request, res: Response): Promise<any> => {
 
 const updateContent = async (req: Request, res: Response): Promise<any> => {
     const { id } = req.params;
-    const { title, link } = req.body;
+    const { title, link, description } = req.body;
 
     if (!id) {
-        return res.status(404).json("id not found");
+        return res.status(400).json({ message: "Content ID not provided" });
     }
-    const updatedContent = await Content.findByIdAndUpdate(
-        id,
-        { ...(title && { title }), ...(link && { link }) },
-        { new: true }
-    );
-    if (!updatedContent) {
-        return res
-            .status(401)
-            .json({ message: "something went wrong while updating content" });
+
+    const updateData: any = {};
+    if (title) updateData.title = title;
+    if (link) updateData.link = link;
+    if (description) updateData.content = description;
+
+    try {
+        const updatedContent = await Content.findByIdAndUpdate(id, updateData, {
+            new: true,
+        });
+
+        if (!updatedContent) {
+            return res
+                .status(404)
+                .json({ message: "Content not found with provided ID" });
+        }
+
+        return res.status(200).json({
+            message: "Content updated successfully",
+            content: updatedContent,
+        });
+    } catch (error) {
+        console.error("Update error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-    return res
-        .status(201)
-        .json({ message: "content updated successfully ", updateContent });
 };
+
 
 const getContentById = async (req: Request, res: Response): Promise<any> => {
     const { id } = req.params;

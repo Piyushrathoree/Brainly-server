@@ -37,7 +37,7 @@ const RegisterUser = async (req, res) => {
             email,
             password: hashedPassword,
             verificationCode,
-            verificationTokenExpiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
+            verificationTokenExpiresAt: Date.now() + 60 * 1000 * 10, // 10 minutes
         });
         await newUser.save();
         const token = newUser.generateAuthToken();

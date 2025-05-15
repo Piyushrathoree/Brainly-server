@@ -24,7 +24,7 @@ userSchema.methods.generateAuthToken = function () {
         throw new Error("JWT_SECRET is not defined in environment variables");
     }
     const token = jsonwebtoken_1.default.sign({ id: this._id }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "10d",
     });
     return token;
 };

@@ -38,7 +38,7 @@ userSchema.methods.generateAuthToken = function (): string {
         throw new Error("JWT_SECRET is not defined in environment variables");
     }
     const token = jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "10d",
     });
     return token;
 };
