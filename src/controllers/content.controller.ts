@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 
 
 const addContent = async (req: Request, res: Response): Promise<any> => {
-    const { title, link, type ,description} = req.body;
+    const { title, link, type, description } = req.body;
     const userId = req.user?.id;
     const tags = req.body.tags || [];
 
@@ -137,8 +137,9 @@ const getContentByUserId = async (
     });
 };
 
-const GetAllContent = async (req: Request, res: Response): Promise<any> => {  
-    const content = await Content.find();
+const GetAllContent = async (req: Request, res: Response): Promise<any> => {
+    const userId = req.user?.id
+    const content = await Content.find({ userId });
     if (content === undefined) {
         return res.status(404).json({ message: "no content found" });
     }
@@ -148,15 +149,22 @@ const GetAllContent = async (req: Request, res: Response): Promise<any> => {
 }
 
 const getPublicContentByUser = async (req: Request, res: Response): Promise<any> => {
-    const { userId } = req.params;
-
-    const user = await User.findById(userId);
-    if (!user || !user.isPublic) {
-        return res.status(403).json({ message: "This user's content is private" });
+    const { shareCode } = req.params;
+    if (!shareCode) {
+        return res.status(404).json({ message: "shareCode not found" });
     }
-
-    const content = await Content.find({ userId }).populate("tags", "title");
-    return res.status(200).json(content);
+    const user = await User.findOne({ shareCode });
+    if (!user) {
+        return res.status(404).json({ message: "user not found" });
+    }
+    const content = await Content.find({ userId: user._id });
+    if (!content) {
+        return res.status(404).json({ message: "no content found" });
+    }
+    return res.status(200).json({
+        message: "content related to this user is fetched ",
+        content,
+    });
 };
 // const getContentByType = async (req: Request, res: Response): Promise<any> => {
 //     const { type } = req.params;

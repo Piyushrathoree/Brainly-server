@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
-import { generateVerificationCode } from "../utils/utils";
+import { generateHash, generateVerificationCode } from "../utils/utils";
 import bcrypt from "bcryptjs";
 import {
     sendForgotPasswordMail,
@@ -28,13 +28,14 @@ declare global {
         }
     }
 }
+const shareCode = generateHash();
 const RegisterUser = async (req: Request, res: Response): Promise<any> => {
     try {
         const { name, email, password } = req.body;
         console.log(name, email, password);
 
         if (!name || !email || !password) {
-                return res.status(400).json({ message: "All fields are required" });
+            return res.status(400).json({ message: "All fields are required" });
         }
 
         const existingUser = await User.findOne({ email });
@@ -50,12 +51,6 @@ const RegisterUser = async (req: Request, res: Response): Promise<any> => {
                 .json({ message: "Failed to generate verification code" });
         }
 
-        //verificaiton email sending
-        const data = await sendRegisterMail(email, verificationCode);
-        if(data==null){
-            return res.status(503).json({message:"Email service unavailable"});
-        }
-        
         const hashedPassword = bcrypt.hashSync(password, 10);
 
         const newUser = new User({
@@ -63,12 +58,17 @@ const RegisterUser = async (req: Request, res: Response): Promise<any> => {
             email,
             password: hashedPassword,
             verificationCode,
-            verificationTokenExpiresAt: Date.now() + 60 * 1000 * 10 , // 10 minutes
+            verificationTokenExpiresAt: Date.now() + 60 * 1000 * 10, // 10 minutes
+            shareCode
         });
         await newUser.save();
         const token = newUser.generateAuthToken();
         const userData = await User.findById(newUser._id).select('-password -verificationCode')
-        
+        //verificaiton email sending
+        const data = await sendRegisterMail(email, verificationCode);
+        if (data == null) {
+            return res.status(503).json({ message: "Email service unavailable" });
+        }
         return res.status(201).json({
             message: "User registered successfully",
             token,
@@ -97,7 +97,7 @@ const LoginUser = async (req: Request, res: Response): Promise<any> => {
     }
 
     const token = user.generateAuthToken();
-    
+
     user.lastLogin = new Date();
     user.isPublic = false
     await user.save();
@@ -245,6 +245,8 @@ const GetUserProfile = async (req: Request, res: Response): Promise<any> => {
 const toggleShare = async (req: Request, res: Response): Promise<any> => {
     const id = req.user?.id;
 
+    console.log(req.user , id );
+    
     if (!id) {
         return res.status(401).json({ message: "Unauthorized" });
     }
@@ -254,13 +256,12 @@ const toggleShare = async (req: Request, res: Response): Promise<any> => {
             return res.status(404).json({ message: "User not found" });
         }
         user.isPublic = !user.isPublic;
-        console.log(user.isPublic);
-
         await user.save();
 
         return res.status(200).json({
             message: "Your profile visibility has been updated",
-            publicURL: `https://app-brainly-peach.vercel.app/share/${id}`
+            shareDetails: user.isPublic ? { shareCode, publicURL: `https://app-brainly-peach.vercel.app/share/${shareCode}`, LocalPublicUrl: `http://localhost:5173/share/${shareCode}` } : null,
+            user
         });
     } catch (error) {
         return res.status(500).json({ message: "Internal server error" });

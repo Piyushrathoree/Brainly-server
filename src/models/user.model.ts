@@ -15,6 +15,7 @@ interface IUser {
     isPublic?:Boolean
     generateAuthToken: () => string;
     comparePassword: (password: string) => Promise<boolean>;
+    shareCode?: string;
 }
 const userSchema = new Schema<IUser>(
     {
@@ -27,7 +28,8 @@ const userSchema = new Schema<IUser>(
         resetPasswordTokenExpires: { type: Date },
         isVerified: { type: Boolean, default: false },
         lastLogin: { type: Date, default: Date.now },
-        isPublic: { type: Boolean, default: false }
+        isPublic: { type: Boolean, default: false },
+        shareCode: { type: String }
     },
     { timestamps: true }
 );
