@@ -15,7 +15,7 @@ contentRouter.get("/get-content/:id", auth_middleware_1.default, content_control
 contentRouter.get("/user/:userId", auth_middleware_1.default, content_controller_1.getContentByUserId);
 // contentRouter.get("/getcontentByType", authMiddleware, getContentByType); 
 // Public route (no middleware)
-contentRouter.get("/share/:userId", content_controller_1.getPublicContentByUser);
+contentRouter.get("/share/:shareCode", content_controller_1.getPublicContentByUser);
 // route for sending all data to user 
 contentRouter.get("/all-content", auth_middleware_1.default, content_controller_1.GetAllContent);
 exports.default = contentRouter;

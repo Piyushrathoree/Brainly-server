@@ -131,7 +131,8 @@ const getContentByUserId = async (req, res) => {
 };
 exports.getContentByUserId = getContentByUserId;
 const GetAllContent = async (req, res) => {
-    const content = await content_model_1.default.find();
+    const userId = req.user?.id;
+    const content = await content_model_1.default.find({ userId });
     if (content === undefined) {
         return res.status(404).json({ message: "no content found" });
     }
@@ -141,12 +142,21 @@ const GetAllContent = async (req, res) => {
 };
 exports.GetAllContent = GetAllContent;
 const getPublicContentByUser = async (req, res) => {
-    const { userId } = req.params;
-    const user = await user_model_1.User.findById(userId);
-    if (!user || !user.isPublic) {
-        return res.status(403).json({ message: "This user's content is private" });
+    const { shareCode } = req.params;
+    if (!shareCode) {
+        return res.status(404).json({ message: "shareCode not found" });
     }
-    const content = await content_model_1.default.find({ userId }).populate("tags", "title");
-    return res.status(200).json(content);
+    const user = await user_model_1.User.findOne({ shareCode });
+    if (!user) {
+        return res.status(404).json({ message: "user not found" });
+    }
+    const content = await content_model_1.default.find({ userId: user._id });
+    if (!content) {
+        return res.status(404).json({ message: "no content found" });
+    }
+    return res.status(200).json({
+        message: "content related to this user is fetched ",
+        content,
+    });
 };
 exports.getPublicContentByUser = getPublicContentByUser;

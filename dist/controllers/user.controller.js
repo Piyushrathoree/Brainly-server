@@ -9,6 +9,7 @@ const utils_1 = require("../utils/utils");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const mail_1 = require("../mail/mail");
 const crypto_1 = __importDefault(require("crypto"));
+const shareCode = (0, utils_1.generateHash)();
 const RegisterUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -26,11 +27,6 @@ const RegisterUser = async (req, res) => {
                 .status(500)
                 .json({ message: "Failed to generate verification code" });
         }
-        //verificaiton email sending
-        const data = await (0, mail_1.sendRegisterMail)(email, verificationCode);
-        if (data == null) {
-            return res.status(503).json({ message: "Email service unavailable" });
-        }
         const hashedPassword = bcryptjs_1.default.hashSync(password, 10);
         const newUser = new user_model_1.User({
             name,
@@ -38,10 +34,16 @@ const RegisterUser = async (req, res) => {
             password: hashedPassword,
             verificationCode,
             verificationTokenExpiresAt: Date.now() + 60 * 1000 * 10, // 10 minutes
+            shareCode
         });
         await newUser.save();
         const token = newUser.generateAuthToken();
         const userData = await user_model_1.User.findById(newUser._id).select('-password -verificationCode');
+        //verificaiton email sending
+        const data = await (0, mail_1.sendRegisterMail)(email, verificationCode);
+        if (data == null) {
+            return res.status(503).json({ message: "Email service unavailable" });
+        }
         return res.status(201).json({
             message: "User registered successfully",
             token,
@@ -205,6 +207,7 @@ const GetUserProfile = async (req, res) => {
 exports.GetUserProfile = GetUserProfile;
 const toggleShare = async (req, res) => {
     const id = req.user?.id;
+    console.log(req.user, id);
     if (!id) {
         return res.status(401).json({ message: "Unauthorized" });
     }
@@ -214,11 +217,11 @@ const toggleShare = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
         user.isPublic = !user.isPublic;
-        console.log(user.isPublic);
         await user.save();
         return res.status(200).json({
             message: "Your profile visibility has been updated",
-            publicURL: `https://app-brainly-peach.vercel.app/share/${id}`
+            shareDetails: user.isPublic ? { shareCode, publicURL: `https://app-brainly-peach.vercel.app/share/${shareCode}`, LocalPublicUrl: `http://localhost:5173/share/${shareCode}` } : null,
+            user
         });
     }
     catch (error) {
