@@ -19,12 +19,7 @@ const app = express();
 app.use(cookieParser()); // Middleware to parse cookies
 app.use(express.json()); // Middleware to parse JSON requests
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded requests
-app.use(cors({
-  origin: "https://app-brainly-peach.vercel.app",
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors());
 
 app.use(session({
   secret: process.env.SESSION_SECRET!,
