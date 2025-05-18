@@ -15,21 +15,12 @@ import './controllers/googleAuth.controller'
 dotenv.config()
 
 const app = express();
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://app-brainly-peach.vercel.app"
-];
+
 app.use(cookieParser()); // Middleware to parse cookies
 app.use(express.json()); // Middleware to parse JSON requests
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded requests
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: "https://app-brainly-peach.vercel.app",
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
