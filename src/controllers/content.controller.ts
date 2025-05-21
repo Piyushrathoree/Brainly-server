@@ -157,6 +157,7 @@ const getPublicContentByUser = async (req: Request, res: Response): Promise<any>
     if (!user) {
         return res.status(404).json({ message: "user not found" });
     }
+    
     const content = await Content.find({ userId: user._id });
     if (!content) {
         return res.status(404).json({ message: "no content found" });
