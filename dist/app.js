@@ -41,7 +41,6 @@ const cors_1 = __importDefault(require("cors"));
 const user_route_1 = __importStar(require("./routes/user.route"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const content_route_1 = __importDefault(require("./routes/content.route"));
-const tag_route_1 = __importDefault(require("./routes/tag.route"));
 //import for oauth
 const express_session_1 = __importDefault(require("express-session"));
 const passport_1 = __importDefault(require("passport"));
@@ -74,5 +73,4 @@ app.use("/oauth", user_route_1.router);
 // middlewares and routes
 app.use("/api/v1", user_route_1.default);
 app.use("/api/v1/content", content_route_1.default);
-app.use("/api/v1/tags", tag_route_1.default); // Assuming you have a tag router
 exports.default = app; // Export the app instance for use in other modules

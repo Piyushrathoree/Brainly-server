@@ -3,7 +3,7 @@ import cors from "cors";
 import AuthRouter, { router } from "./routes/user.route";
 import cookieParser from "cookie-parser";
 import contentRouter from "./routes/content.route";
-import TagRouter from "./routes/tag.route";
+
 
 //import for oauth
 import session from 'express-session'
@@ -48,6 +48,6 @@ app.use("/oauth", router)
 // middlewares and routes
 app.use("/api/v1", AuthRouter);
 app.use("/api/v1/content", contentRouter);
-app.use("/api/v1/tags", TagRouter); // Assuming you have a tag router
+
 
 export default app; // Export the app instance for use in other modules
