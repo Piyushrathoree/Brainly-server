@@ -53,14 +53,20 @@ app.use(express_1.default.json()); // Middleware to parse JSON requests
 app.use(express_1.default.urlencoded({ extended: true })); // Middleware to parse URL-encoded requests
 const allowedOrigins = [
     "http://localhost:5173",
-    "https://app-brainly-peach.vercel.app"
+    "https://app-brainly-peach.vercel.app",
 ];
 app.use((0, cors_1.default)({
     origin: allowedOrigins,
-    credentials: true // if you use cookies/sessions
+    credentials: true, // if you use cookies/sessions
 }));
+const sessionSecret = process.env.SESSION_SECRET ||
+    process.env.JWT_SECRET ||
+    "dev-session-secret";
+if (!process.env.SESSION_SECRET) {
+    console.warn("[session] SESSION_SECRET not set; using a dev fallback. Set SESSION_SECRET in .env for production.");
+}
 app.use((0, express_session_1.default)({
-    secret: process.env.SESSION_SECRET,
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: true,
 }));

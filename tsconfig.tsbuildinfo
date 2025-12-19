@@ -1,1 +1,1 @@
-{"root":["./src/index.ts"],"version":"5.8.2"}
+{"root":["./src/app.ts","./src/index.ts","./src/controllers/content.controller.ts","./src/controllers/googleAuth.controller.ts","./src/controllers/user.controller.ts","./src/db/db.ts","./src/mail/mail.ts","./src/mail/mailTemplate.ts","./src/middlewares/auth.middleware.ts","./src/models/content.model.ts","./src/models/oAuth.model.ts","./src/models/tag.model.ts","./src/models/user.model.ts","./src/routes/content.route.ts","./src/routes/user.route.ts","./src/utils/jwt.ts","./src/utils/utils.ts"],"version":"5.8.3"}

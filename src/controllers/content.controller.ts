@@ -4,7 +4,6 @@ import Tag from "../models/tag.model";
 import { User } from "../models/user.model";
 import mongoose from "mongoose";
 
-
 const addContent = async (req: Request, res: Response): Promise<any> => {
     const { title, link, type, description } = req.body;
     const userId = req.user?.id;
@@ -23,8 +22,29 @@ const addContent = async (req: Request, res: Response): Promise<any> => {
     if (existingContent) {
         return res.status(400).json({ message: "Content already exists" });
     }
-    const tag = await Tag.find({ title: { $in: tags } });
-    const tagIds = tag.map(tag => tag._id);
+    const normalizedTags: string[] = tags
+        .map((t: any) => String(t).trim())
+        .filter((t: string) => t.length > 0);
+
+    const existingTags = await Tag.find({ title: { $in: normalizedTags } });
+    const existingTitles = new Set(existingTags.map((t: any) => t.title));
+    const missingTitles = normalizedTags.filter(
+        (t: string) => !existingTitles.has(t)
+    );
+
+    if (missingTitles.length > 0) {
+        try {
+            await Tag.insertMany(
+                missingTitles.map((t: string) => ({ title: t })),
+                { ordered: false }
+            );
+        } catch {
+            // ignore duplicate insert races
+        }
+    }
+
+    const allTags = await Tag.find({ title: { $in: normalizedTags } });
+    const tagIds = allTags.map((tag: any) => tag._id);
 
     const content = new Content({
         title,
@@ -40,7 +60,7 @@ const addContent = async (req: Request, res: Response): Promise<any> => {
         .json({ message: "Content created successfully", content });
 };
 
-//controller for admin 
+//controller for admin
 
 // const getContent = async (req: Request, res: Response): Promise<any> => {
 //     const content = await Content.find();
@@ -65,7 +85,10 @@ const deleteContent = async (req: Request, res: Response): Promise<any> => {
     }
     return res
         .status(201)
-        .json({ message: "content deleted successfully ", deleteContent });
+        .json({
+            message: "content deleted successfully ",
+            content: deletedContent,
+        });
 };
 
 const updateContent = async (req: Request, res: Response): Promise<any> => {
@@ -102,7 +125,6 @@ const updateContent = async (req: Request, res: Response): Promise<any> => {
     }
 };
 
-
 const getContentById = async (req: Request, res: Response): Promise<any> => {
     const { id } = req.params;
     if (!id) {
@@ -138,7 +160,7 @@ const getContentByUserId = async (
 };
 
 const GetAllContent = async (req: Request, res: Response): Promise<any> => {
-    const userId = req.user?.id
+    const userId = req.user?.id;
     const content = await Content.find({ userId });
     if (content === undefined) {
         return res.status(404).json({ message: "no content found" });
@@ -146,9 +168,12 @@ const GetAllContent = async (req: Request, res: Response): Promise<any> => {
     return res
         .status(200)
         .json({ message: "all content fetched successfully ", content });
-}
+};
 
-const getPublicContentByUser = async (req: Request, res: Response): Promise<any> => {
+const getPublicContentByUser = async (
+    req: Request,
+    res: Response
+): Promise<any> => {
     const { shareCode } = req.params;
     if (!shareCode) {
         return res.status(404).json({ message: "shareCode not found" });
@@ -157,7 +182,7 @@ const getPublicContentByUser = async (req: Request, res: Response): Promise<any>
     if (!user) {
         return res.status(404).json({ message: "user not found" });
     }
-    
+
     const content = await Content.find({ userId: user._id });
     if (!content) {
         return res.status(404).json({ message: "no content found" });
@@ -184,7 +209,6 @@ const getPublicContentByUser = async (req: Request, res: Response): Promise<any>
 //     });
 // }
 
-
 export {
     // getContent,
     addContent,
@@ -194,5 +218,5 @@ export {
     deleteContent,
     getPublicContentByUser,
     // getContentByType,
-    GetAllContent
+    GetAllContent,
 };

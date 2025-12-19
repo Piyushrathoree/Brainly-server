@@ -13,10 +13,10 @@ declare global {
     namespace Express {
         interface Request {
             user?: {
-                _id: string;
-                name: string;
-                email: string;
-                isVerified: boolean;
+                _id?: string;
+                name?: string;
+                email?: string;
+                isVerified?: boolean;
                 lastLogin?: Date;
                 verificationCode?: string;
                 verificationCodeExpires?: Date;
@@ -59,15 +59,19 @@ const RegisterUser = async (req: Request, res: Response): Promise<any> => {
             password: hashedPassword,
             verificationCode,
             verificationTokenExpiresAt: Date.now() + 60 * 1000 * 10, // 10 minutes
-            shareCode
+            shareCode,
         });
         await newUser.save();
         const token = newUser.generateAuthToken();
-        const userData = await User.findById(newUser._id).select('-password -verificationCode')
+        const userData = await User.findById(newUser._id).select(
+            "-password -verificationCode"
+        );
         //verificaiton email sending
         const data = await sendRegisterMail(email, verificationCode);
         if (data == null) {
-            return res.status(503).json({ message: "Email service unavailable" });
+            return res
+                .status(503)
+                .json({ message: "Email service unavailable" });
         }
         return res.status(201).json({
             message: "User registered successfully",
@@ -99,7 +103,7 @@ const LoginUser = async (req: Request, res: Response): Promise<any> => {
     const token = user.generateAuthToken();
 
     user.lastLogin = new Date();
-    user.isPublic = false
+    user.isPublic = false;
     await user.save();
     await sendWelcomeBackMail(email, `${process.env.CLIENT_URL}/dashboard`);
 
@@ -228,7 +232,6 @@ const LogoutUser = async (req: Request, res: Response): Promise<any> => {
 
 const GetUserProfile = async (req: Request, res: Response): Promise<any> => {
     try {
-
         const user = await User.findById(req.user?.id).select(
             "-password -verificationCode -verificationCodeExpires -resetPasswordToken -resetPasswordTokenExpires"
         );
@@ -245,8 +248,8 @@ const GetUserProfile = async (req: Request, res: Response): Promise<any> => {
 const toggleShare = async (req: Request, res: Response): Promise<any> => {
     const id = req.user?.id;
 
-    console.log(req.user , id );
-    
+    console.log(req.user, id);
+
     if (!id) {
         return res.status(401).json({ message: "Unauthorized" });
     }
@@ -260,13 +263,19 @@ const toggleShare = async (req: Request, res: Response): Promise<any> => {
 
         return res.status(200).json({
             message: "Your profile visibility has been updated",
-            shareDetails: user.isPublic ? { shareCode, publicURL: `https://app-brainly-peach.vercel.app/share/${shareCode}`, LocalPublicUrl: `http://localhost:5173/share/${shareCode}` } : null,
-            user
+            shareDetails: user.isPublic
+                ? {
+                      shareCode,
+                      publicURL: `https://app-brainly-peach.vercel.app/share/${shareCode}`,
+                      LocalPublicUrl: `http://localhost:5173/share/${shareCode}`,
+                  }
+                : null,
+            user,
         });
     } catch (error) {
         return res.status(500).json({ message: "Internal server error" });
     }
-}
+};
 
 export {
     RegisterUser,
@@ -277,5 +286,5 @@ export {
     LogoutUser,
     GetUserProfile,
     changePassword,
-    toggleShare
+    toggleShare,
 };

@@ -1,10 +1,7 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ensureAuthenticated = ensureAuthenticated;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const jwt_1 = require("../utils/jwt");
 const authMiddleware = (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
@@ -15,17 +12,13 @@ const authMiddleware = (req, res, next) => {
         if (!process.env.JWT_SECRET) {
             throw new Error("JWT_SECRET is not defined in environment variables");
         }
-        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-        if (!decoded) {
+        const decoded = (0, jwt_1.verifyJwt)(token, process.env.JWT_SECRET);
+        const id = decoded.id;
+        if (typeof id !== "string") {
             res.status(401).json({ message: "Invalid token" });
             return;
         }
-        if (typeof decoded === "object" && decoded !== null) {
-            req.user = decoded;
-        }
-        else {
-            throw new Error("Invalid token payload");
-        }
+        req.user = { id };
         if (!req.user) {
             res.status(401).json({ message: "Unauthorized" });
             return;

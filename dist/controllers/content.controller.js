@@ -24,8 +24,22 @@ const addContent = async (req, res) => {
     if (existingContent) {
         return res.status(400).json({ message: "Content already exists" });
     }
-    const tag = await tag_model_1.default.find({ title: { $in: tags } });
-    const tagIds = tag.map(tag => tag._id);
+    const normalizedTags = tags
+        .map((t) => String(t).trim())
+        .filter((t) => t.length > 0);
+    const existingTags = await tag_model_1.default.find({ title: { $in: normalizedTags } });
+    const existingTitles = new Set(existingTags.map((t) => t.title));
+    const missingTitles = normalizedTags.filter((t) => !existingTitles.has(t));
+    if (missingTitles.length > 0) {
+        try {
+            await tag_model_1.default.insertMany(missingTitles.map((t) => ({ title: t })), { ordered: false });
+        }
+        catch {
+            // ignore duplicate insert races
+        }
+    }
+    const allTags = await tag_model_1.default.find({ title: { $in: normalizedTags } });
+    const tagIds = allTags.map((tag) => tag._id);
     const content = new content_model_1.default({
         title,
         link,
@@ -40,7 +54,7 @@ const addContent = async (req, res) => {
         .json({ message: "Content created successfully", content });
 };
 exports.addContent = addContent;
-//controller for admin 
+//controller for admin
 // const getContent = async (req: Request, res: Response): Promise<any> => {
 //     const content = await Content.find();
 //     if (content === undefined) {
@@ -63,7 +77,10 @@ const deleteContent = async (req, res) => {
     }
     return res
         .status(201)
-        .json({ message: "content deleted successfully ", deleteContent });
+        .json({
+        message: "content deleted successfully ",
+        content: deletedContent,
+    });
 };
 exports.deleteContent = deleteContent;
 const updateContent = async (req, res) => {

@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { signJwt } from "../utils/jwt";
 
 interface IUser {
     name: string;
@@ -12,7 +12,7 @@ interface IUser {
     resetPasswordTokenExpires?: Date;
     isVerified?: boolean;
     lastLogin?: Date;
-    isPublic?:Boolean
+    isPublic?: Boolean;
     generateAuthToken: () => string;
     comparePassword: (password: string) => Promise<boolean>;
     shareCode?: string;
@@ -21,7 +21,7 @@ const userSchema = new Schema<IUser>(
     {
         name: { type: String, required: true },
         email: { type: String, required: true },
-        password: { type: String, required: true, },
+        password: { type: String, required: true },
         verificationCode: { type: String },
         verificationCodeExpires: { type: Date },
         resetPasswordToken: { type: String },
@@ -29,20 +29,21 @@ const userSchema = new Schema<IUser>(
         isVerified: { type: Boolean, default: false },
         lastLogin: { type: Date, default: Date.now },
         isPublic: { type: Boolean, default: false },
-        shareCode: { type: String }
+        shareCode: { type: String },
     },
     { timestamps: true }
 );
-
 
 userSchema.methods.generateAuthToken = function (): string {
     if (!process.env.JWT_SECRET) {
         throw new Error("JWT_SECRET is not defined in environment variables");
     }
-    const token = jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-        expiresIn: "10d"
-    });
-    return token;
+    // 10 days
+    return signJwt(
+        { id: String(this._id) },
+        process.env.JWT_SECRET,
+        10 * 24 * 60 * 60
+    );
 };
 userSchema.methods.comparePassword = async function (
     password: string

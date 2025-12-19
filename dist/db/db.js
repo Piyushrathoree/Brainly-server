@@ -6,7 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const connectDB = async () => {
     try {
-        await mongoose_1.default.connect(process.env.MONGODB_URI);
+        const uri = process.env.MONGODB_URI;
+        if (!uri) {
+            console.error("MONGODB_URI is not set. Create a .env file (copy from .env.example) and set MONGODB_URI.");
+            process.exit(1);
+        }
+        await mongoose_1.default.connect(uri);
         console.log("MongoDB connected");
     }
     catch (error) {
